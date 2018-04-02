@@ -77,26 +77,54 @@ def get_page_equal_ruleid(rule_id):
                     return page
 
 
-def gen_doc(name, page):
+class gen_doc():
     document = Document()
-    document.add_heading(text=u'用了'+name+u'规则的页面',level=1)
-
     paragraph = document.add_paragraph()
     run = paragraph.add_run()
     run.font.size = Pt(24)
     run.font.name = u'宋体'
-    for item in page:
-        document.add_paragraph(text=item, style='ListBullet')
-    document.add_page_break()
-    document.save(name+'.docx')
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name', None)
+        self.url = kwargs.pop('url', None)
+
+    def run(self):
+        if self.url :
+            if isinstance(self.name, list):
+                self.document.add_heading(text=u'与' + self.url + u'相关的规则与页面', level=1)
+                for name_item in self.name:
+                    rule_id = get_ruleid(name_item)
+                    page = get_page_equal_ruleid(rule_id)
+                    if isinstance(page,list):
+                        self.document.add_heading(text=u'用了' + name_item + u'规则的页面', level=2)
+                        for item in page:
+                            self.document.add_paragraph(text=item, style='ListBullet')
+            self.document.save(u'使用了url' + '.docx')
+
+        else:
+            if isinstance(self.name, str):
+                self.document.add_heading(text=u'用了'+ self.name.decode('utf-8')+u'规则的页面',level=1)
+                rule_id = get_ruleid(self.name)
+                page = get_page_equal_ruleid(rule_id)
+                if page and isinstance(page, list):
+                    for item in page:
+                        self.document.add_paragraph(text=item, style='ListBullet')
+            self.document.save(self.name.decode('utf-8') + '.docx')
+        #document.add_page_break()
+
 
 def main():
-    rule_name = get_rule_name("http://61.164.49.130:13001/statisticsTask/api/result/list")
-    for rule in rule_name:
-        rule_id = get_ruleid(rule)
-        if rule_id:
-            page = get_page_equal_ruleid(rule_id)
-            if page:
-                gen_doc(rule, page)
+    url ="http://61.164.49.130:13001/statisticsTask/api/result/list"
+    name =""
+    print(type(name))
+    if url:
+        rule_name = get_rule_name(url)
+        get_doc = gen_doc(url=url,name=rule_name)
+        get_doc.run()
+    if name:
+        get_doc = gen_doc(name=name)
+        get_doc.run()
+
+
 if __name__ == "__main__":
     main()
