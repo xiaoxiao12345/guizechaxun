@@ -49,7 +49,6 @@ def get_ruleid(name):
             print("no rule")
 
 def get_page_equal_ruleid(rule_id, system):
-    page = []
     client = MongoClient('192.168.0.102', 27017)
     gz_db = client[system]
     gz_collection = gz_db.page_setup.find({},{"relations":1})
