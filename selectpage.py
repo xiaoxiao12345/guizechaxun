@@ -69,9 +69,7 @@ def get_page_equal_ruleid(rule_id, system):
                     dev_db = client.devplatform
                     page_collection = dev_db.page.find({"_id":item['_id']})
                     for page_item in page_collection:
-                        for page_key,page_value in page_item.items():
-                            if page_key == 'alias':
-                                page.append(page_value)
+                        page =[page_value for page_key,page_value in page_item.items() if page_key == 'alias']
 
                     return page
 
@@ -105,7 +103,7 @@ class gen_doc():
             if isinstance(self.name, str):
                 self.document.add_heading(text=u'用了'+ self.name.decode('utf-8')+u'规则的页面',level=1)
                 rule_id = get_ruleid(self.name)
-                page = get_page_equal_ruleid(rule_id)
+                page = get_page_equal_ruleid(rule_id, self.system)
                 if page and isinstance(page, list):
                     for item in page:
                         self.document.add_paragraph(text=item, style='ListBullet')
@@ -114,8 +112,8 @@ class gen_doc():
 
 
 def main():
-    url ="http://61.164.49.130:13001/statisticsTask/api/result/list"
-    name =""
+    url =""
+    name ="中信资讯"
     system= "gz_opinion"
     if url and system:
         rule_name = get_rule_name(url, system)
